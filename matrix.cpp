@@ -4,13 +4,23 @@
 int n,m,r;
 double a[100][100],b[100][100],c[100][100],ans;
 
-
-void matrix1(int t)
+bool CheckZero(int s)
 {
-		if (a[t][t]!=1.0)
+	for (int i=s;i<=n;i++)
+	 for (int j=1;j<=m;j++) 
+	  if (a[i][j]!=0) return true;
+	 return false; 
+}
+
+int TurnMatrixIntoFloor(int t,int tt)
+{
+	if (!CheckZero(t)) return t-1;
+		else
+		{
+			if (a[t][tt]!=1.0)
          {
 	       for (int i=t+1;i<=n;i++)
-              if (a[i][t]==1.0) 
+              if (a[i][tt]==1.0) 
 	          {
 				  	ans=-ans;
 		          double q;
@@ -29,10 +39,10 @@ void matrix1(int t)
 				 break;
 	          }
           }	
-        if (a[t][t]==0)
+        if (a[t][tt]==0)
          {
 				for (int i=1;i<=n;i++) 
-				 if (a[i][t]!=0)
+				 if (a[i][tt]!=0)
 				 {
 					double q;
 				 	ans=-ans;
@@ -43,16 +53,16 @@ void matrix1(int t)
 		              break;
 				 } 
 		 }
-        if (a[t][t]!=1.0)
+        if (a[t][tt]!=1.0)
 	     {
-				double m=a[t][t];
+				double m=a[t][tt];
 					ans*=m;
 				for (int j=t;j<=2*n;j++) a[t][j]/=m;
 		 } // the first one bacome 1;
    for (int i=t+1;i<=n;i++)
    {
-		double m=a[i][t];
-	   for (int j=t;j<=2*n;j++)
+		double m=a[i][tt];
+	   for (int j=tt;j<=2*n;j++)
 	   {
 		   a[i][j]-=m*a[t][j];
 	   }
@@ -68,10 +78,12 @@ void matrix1(int t)
 		printf("\n");printf("\n");printf("\n");  */
 		 
 	
-    if (t!=n) matrix1(t+1);
+    if ((t!=n) || (tt!=m)) TurnMatrixIntoFloor(t+1,tt+1);
+    }
+    return -1;
 }
 						
-void matrix2(int t)
+void TurnIntoIndentityMatrix(int t)
 {
   for(int i=t-1;i>=1;i--)
    {
@@ -88,7 +100,7 @@ void matrix2(int t)
 		             printf("\n");
 		         }
 			     printf("\n");printf("\n"); printf("\n"); */
-   if(t!=1) matrix2(t-1);
+   if(t!=1) TurnIntoIndentityMatrix(t-1);
 }
 
 void plus(int n,int m)
@@ -98,60 +110,23 @@ void plus(int n,int m)
 	  c[i][j]=a[i][j]+b[i][j];
 }
 
-
-bool checkzero(int g,int f)
-{
-	//printf("%d %d",g,f);
-	for (int o=g;o<=n;o++)
-	 for (int l=f;l<=m;l++)
-	  if (a[o][l]!=0) return false;
-	return true; 
-} 
-
-int matrixrank(int n,int m)
-{
-  int s=1,e=1;
-  while (!checkzero(s,e))
-   {
-		if (a[s][e]==0) 
-		 for (int i=s+1;i<=n;i++) 
-		  if (a[i][e]!=0)
-		  {
-				for (int j=e;j<=m;j++)
-				 {
-						double q;
-						q=a[s][j]; a[s][j]=a[i][j]; a[i][j]=q;
-				 }
-		  } 
-		if (a[s][e]==0)
-		 {
-				if (e==m) return s;
-				else matrixrank(s,e+1);
-		 }
-		else 
-		{
-		   if (s<m) matrixrank(s+1,e+1);
-		   else return s;
-        }
-    }
-}
-
-
 int main()
 {
+	 printf("Welcome use this tools,all numbers should be seperated by 'space'.Likes:\n");
+    printf("1 0 0\n0 1 0\n0 0 1\n");
 	while (true)
   {
     {
 		memset(a,0,sizeof(a));
         memset(b,0,sizeof(b));
-        memset(c,0,sizeof(c));
-        printf("Choose opreations(end with 'enter')\n");
+        memset(c,0,sizeof(c)); 
+		printf("Choose opreations(end with 'enter')\n");
         printf("1:matrix addition\n");
         printf("2:matrix subtraction\n");
         printf("3:matrix multiplication\n"); 
         printf("4:the inverse matrix\n(Notice that the answer maybe unrealiable when the answer contains fractions.)\n");
-        //printf("5:DET\n"); 
-        //printf("6:the rank of the matrix(STILL TESTING)\n"); 
+        printf("5:DET\n"); 
+        printf("6:the rank of the matrix(STILL TESTING)\n"); 
         printf("enter 'Ctrl+C' to exit\n");
         scanf("%d",&r);
 	} 
@@ -173,8 +148,8 @@ int main()
 					a[i][j]=1.0;
 			 }
 		}
-	matrix1(1);
-	matrix2(n);
+	TurnMatrixIntoFloor(1,1);
+	TurnIntoIndentityMatrix(n);
 	printf("The inverse matrix is:\n");
 	for (int i=1;i<=n;i++)
 	    {
@@ -268,21 +243,24 @@ int main()
 	}
 	case 5: //DET;
 	{ 
-		printf("Enter the row and column of the matrixs:");
+		printf("Enter the row OR column of the matrix:\n");
 		scanf("%d",&n);
+		m=n;
 		ans=1;
-		printf("Enter the matrix A:\n");
+		printf("Enter the matrix:\n");
 		for (int i=1;i<=n;i++)
 		  for (int j=1;j<=n;j++)
 		    scanf("%lf",&a[i][j]);
-		matrix1(1);
-		for (int i=1;i<=n;i++) ans*=a[i][i]; 
-		printf("DET(A)=%.2lf\n",ans);
-		break;
+		if(TurnMatrixIntoFloor(1,1)!=-1) printf("ERROR!not full rank\n.");
+		else{
+			for (int i=1;i<=n;i++) ans*=a[i][i]; 
+		    printf("DET=%.2lf\n",ans);
+	    }
+	    break;
 	}
     case 6://rank 
 	{
-		printf("Enter the row and column of the matrixs:");
+		printf("Enter the row and column of the matrix:\n");
 		int n,m;
 		scanf("%d%d",&n,&m);
 		//printf("%d%d",n,m);
@@ -290,7 +268,9 @@ int main()
 		for (int i=1;i<=n;i++)
 		  for (int j=1;j<=m;j++)
 		   scanf("%lf",&a[i][j]);
-		   printf("%d\n",matrixrank(n,m));
+		printf("The Rank is ");
+		  // if (TurnMatrixIntoFloor(n,m)!=-1) printf("%d\n",n);
+		    printf("%d\n",TurnMatrixIntoFloor(n,m));
     	break;
     }
     	default: printf("Error.\n");
